@@ -5,7 +5,7 @@ app = Flask(__name__)
 # This route opens the LinkedIn share dialog
 @app.route('/share')
 def share():
-    preview_url = "https://your-domain.com/preview"  # Replace with your real domain
+    preview_url = "https://testing.dpdp-privcy.in.net/"  # Replace with your real domain
     linkedin_url = f"https://www.linkedin.com/sharing/share-offsite/?url={preview_url}"
     return redirect(linkedin_url)
 
