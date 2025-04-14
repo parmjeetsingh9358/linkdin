@@ -1,41 +1,52 @@
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, redirect, request, session
 import requests
 import secrets
+from urllib.parse import quote
 
 app = Flask(__name__)
 
-# Secret key for session management (you can change this)
+# Secret key for session management
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
 CLIENT_ID = "8600kyqzq8melc"
 CLIENT_SECRET = "WPL_AP1.Lk3dk1bVdMfM8zAp.yuuqUQ=="
-REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Ensure this matches the registered URI
+REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must exactly match LinkedIn app config
 
-# OAuth scope (permissions requested from the user)
+# OAuth scope (permissions requested)
 SCOPE = "r_liteprofile r_emailaddress w_member_social"
 
-# Step 1: Redirect to LinkedIn for authorization
+# Step 1: Redirect to LinkedIn for user authorization
 @app.route('/')
 def index():
-    state = secrets.token_urlsafe(16)  # Generate a random state string for security
-    session['state'] = state  # Store the state in the session to verify on callback
+    state = secrets.token_urlsafe(16)
+    session['state'] = state
 
-    # LinkedIn authorization URL
-    auth_url = f"https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={state}"
+    auth_url = (
+        "https://www.linkedin.com/oauth/v2/authorization"
+        f"?response_type=code"
+        f"&client_id={CLIENT_ID}"
+        f"&redirect_uri={quote(REDIRECT_URI)}"
+        f"&scope={quote(SCOPE)}"
+        f"&state={state}"
+    )
+
+    print("Redirecting to LinkedIn:", auth_url)
     return redirect(auth_url)
 
-
-# Step 2: Callback route to handle LinkedIn's redirect
+# Step 2: Callback route to handle LinkedIn redirect with the auth code
 @app.route('/callback')
 def callback():
-    # Step 2a: Get the authorization code and state from the request
+    print("Request args:", request.args)  # Log incoming GET params
+
     auth_code = request.args.get('code')
     state = request.args.get('state')
 
-    # Step 2b: Verify the state matches the session value
-    if state != session.get('state'):
-        return "Error: Invalid state", 400  # Security issue if states don't match
+    # Validate presence of required query parameters
+    if not auth_code:
+        return "Error: Missing authorization code.", 400
+    if not state or state != session.get('state'):
+        return "Error: Invalid state parameter.", 400
 
     # Step 3: Exchange the authorization code for an access token
     token_url = "https://www.linkedin.com/oauth/v2/accessToken"
@@ -46,17 +57,19 @@ def callback():
         'client_id': CLIENT_ID,
         'client_secret': CLIENT_SECRET
     }
-    
-    response = requests.post(token_url, data=token_data)
+
+    token_headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+
+    response = requests.post(token_url, data=token_data, headers=token_headers)
 
     if response.status_code == 200:
-        # Successfully received the access token
         access_token = response.json().get('access_token')
-        return f"Access Token: {access_token}"
+        return f"<h3>✅ Access Token:</h3><p>{access_token}</p>"
     else:
-        # Handle error from LinkedIn
-        return f"Error: {response.json().get('error_description')}", 400
-
+        error_data = response.json()
+        return f"<h3>❌ Error:</h3><pre>{error_data}</pre>", 400
 
 if __name__ == '__main__':
     app.run(debug=True)
