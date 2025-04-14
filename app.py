@@ -116,7 +116,7 @@ def callback():
     asset_urn = upload_data["value"]["asset"]
 
     # Step 4: Upload image to LinkedIn
-    image_path = "your_image.jpg"  # Make sure this image exists in your folder
+    image_path = "https://cdn.pixabay.com/photo/2020/08/24/21/44/man-5515150_640.jpg"  # Make sure this image exists in your folder
     with open(image_path, "rb") as f:
         upload_image_res = requests.put(upload_url, data=f, headers={
             "Authorization": f"Bearer {access_token}",
