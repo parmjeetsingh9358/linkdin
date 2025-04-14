@@ -9,7 +9,7 @@ app.secret_key = secrets.token_urlsafe(16)
 CLIENT_ID = "86s0cexioiiox7"
 CLIENT_SECRET = "WPL_AP1.flaMDksZJWvYDgxB.1KSB3A=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"
-SCOPE = "r_liteprofile r_emailaddress"  # No post permission needed
+SCOPE = "openid profile w_member_social email"
 
 @app.route('/')
 def index():
