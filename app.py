@@ -1,15 +1,18 @@
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, redirect, render_template
 
 app = Flask(__name__)
 
-# This route opens the LinkedIn share dialog
+@app.route('/')
+def home():
+    return '<a href="/share">Share on LinkedIn</a>'
+
 @app.route('/share')
 def share():
-    preview_url = "https://testing.dpdp-privcy.in.net/"  # Replace with your real domain
+    # Redirect to LinkedIn share dialog with your preview page URL
+    preview_url = "https://testing.dpdp-privcy.in.net/"  # Change this to your live domain
     linkedin_url = f"https://www.linkedin.com/sharing/share-offsite/?url={preview_url}"
     return redirect(linkedin_url)
 
-# This is the preview page that LinkedIn scrapes (with OG tags)
 @app.route('/preview')
 def preview():
     return render_template('preview.html')
