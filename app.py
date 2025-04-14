@@ -75,10 +75,10 @@ def callback():
     access_token = token_response.json().get('access_token')
     print(access_token, "=========")
 
-    access_token1 = "AQU8dc7wNu_FDEsiIl7CIXHxSdhM1Coqp7AMwhKYKKN6dxJYW2e0FLMWwFJCgCkMQGCnO6LgHVnC3uRGfHA4q8qUTnoZ8YLUL6ccTTt6NtlVQNBfbsjkh1_bLkW9QFSAOn34zlo1TC8p1-yXWZteBtnth0DWIzpKeElGwJXss7oMCIpQb1g1gxB2ekwYORh9L3cWX__tdzwOGaNdu_wC5oCPOJ80wGaoYgMr_G1EscFd16oA9cDaPuWjJG8N2oOV2DjwntztZCwi1WK9WnjSMoeHCU7PHmHjLi6zyUq0OhFrJNf2JFgQbVQRgFKZ1A0weUTbtL2gLsLA1ESaRoZsPO9QzvujmA"
+    access_token1 = "AQW5FpxNN9xtSJtsJwHG1fRr9m3C2_Na-1Pn5GJg9Rz99cOjlR93KaS6pvvh2V-4sN-_YDHvre8ujYvgLY5TUwD-7qsRhDrNgubfvo0oWF0NHFKMfEhRBfzK98eyEIWsbAy8ZqTqGsWiSAFbkC1DLoCKnFraplqpWuwJS1c7FTiVp1nhu5reeJGP-RLPs_wB99HTK0R595coNDNFGw3LfaxsZ6nv69f59NbWfpB3mpxpJ7zlz5978FQGWhFvzJGJ6u55O3p48FV6iLqE0pIDJQtSBOx2nigjrm0qeNhsaDE8f8HLjVcmKg51aMaPQfmWyAD04Sukw71LQGXGbvb31SWkr47NcA"
     # Step 2: Get actual user URN
     me_response = requests.get(
-        "https://api.linkedin.com/v2/userinfo",
+        "https://api.linkedin.com/v2/me",
         headers={"Authorization": f"Bearer {access_token1}"}
     )
     print(me_response, "==== me_response ====")
