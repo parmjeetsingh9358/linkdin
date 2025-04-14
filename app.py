@@ -17,7 +17,7 @@ CLIENT_SECRET = "WPL_AP1.aiBbAF6LB8hsTBu6.3dwtNQ=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
 # Scope for posting (must be approved in LinkedIn dev portal)
-SCOPE = "profile, w_member_social"
+SCOPE = "w_member_social"
 
 @app.route('/')
 def index():
