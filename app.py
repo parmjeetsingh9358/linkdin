@@ -1,24 +1,15 @@
-from flask import Flask, redirect, request, session
-import requests
+from flask import Flask, redirect, request, session, render_template_string
 import secrets
 from urllib.parse import quote
-import json
-import io
 
 app = Flask(__name__)
-
-# Set up session configuration for secure cookies and SameSite policy
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
 CLIENT_ID = "86s0cexioiiox7"
 CLIENT_SECRET = "WPL_AP1.flaMDksZJWvYDgxB.1KSB3A=="
-REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
-
-# Scope for posting (must be approved in LinkedIn dev portal)
-SCOPE = "openid profile w_member_social email"
+REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"
+SCOPE = "r_liteprofile r_emailaddress"  # No post permission needed
 
 @app.route('/')
 def index():
@@ -33,156 +24,51 @@ def index():
         f"&scope={quote(SCOPE)}"
         f"&state={state}"
     )
-
-    print("Redirecting to LinkedIn:", auth_url)
     return redirect(auth_url)
 
 @app.route('/callback')
 def callback():
-    print("Request args:", request.args)
+    error = request.args.get('error')
+    if error:
+        return f"<h3>❌ LinkedIn Error:</h3><p>{error}</p>", 400
 
-    if 'error' in request.args:
-        error = request.args.get('error')
-        error_desc = request.args.get('error_description')
-        return f"<h3>❌ OAuth Error:</h3><p><b>{error}</b>: {error_desc}</p>", 400
-
-    auth_code = request.args.get('code')
     state = request.args.get('state')
+    if state != session.get('state'):
+        return "Error: State mismatch!", 400
 
-    if not auth_code:
-        return "Error: Missing authorization code.", 400
-    if not state or state != session.get('state'):
-        return "Error: Invalid state parameter.", 400
+    # Instead of auto-posting, redirect user to the LinkedIn Share Dialog
+    certificate_url = "https://marketplace.canva.com/EAFtLMllF3s/1/0/1600w/canva-blue-and-gold-simple-certificate-zxaa6yB-uaU.jpg"
 
-    # Step 1: Exchange authorization code for access token
-    token_url = "https://www.linkedin.com/oauth/v2/accessToken"
-    token_data = {
-        'grant_type': 'authorization_code',
-        'code': auth_code,
-        'redirect_uri': REDIRECT_URI,
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET
-    }
-    token_headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
+    share_url = f"https://www.linkedin.com/sharing/share-offsite/?url={quote(certificate_url)}"
 
-    token_response = requests.post(token_url, data=token_data, headers=token_headers)
+    # Show suggested text + copy button + LinkedIn post dialog link
+    html = f"""
+    <h2>🎉 Ready to share your certificate on LinkedIn?</h2>
+    <p>1. Click the button below to open the LinkedIn post dialog.</p>
+    <p>2. Paste the suggested text when prompted.</p>
 
-    if token_response.status_code != 200:
-        return f"<h3>❌ Error Fetching Token:</h3><pre>{token_response.json()}</pre>", 400
+    <textarea id="postText" rows="10" cols="80">
+🎉 Excited to share that I’ve successfully completed the "Data Protection and Privacy Foundations" certification from Privacyium Tech! 🚀
+This course helped me strengthen my understanding of data handling principles, GDPR compliance, and secure data practices.
+Thanks to the instructors and mentors for the guidance and support!
+📄 Here’s my certificate 👇
+#DataPrivacy #GDPR #Cybersecurity #LearningNeverStops #LinkedIn #Achievement
+    </textarea><br><br>
 
-    access_token = token_response.json().get('access_token')
-    print(access_token, "=========")
+    <button onclick="copyText()">📋 Copy Text</button>
+    <a href="{share_url}" target="_blank"><button>📢 Share on LinkedIn</button></a>
 
-    # Step 2: Get actual user URN
-    me_response = requests.get(
-        "https://api.linkedin.com/v2/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
-    print(me_response, "==== me_response ====")
-    print(me_response.json(), "==== json ====")
+    <script>
+    function copyText() {{
+        const textArea = document.getElementById("postText");
+        textArea.select();
+        document.execCommand("copy");
+        alert("Post text copied! You can now paste it into LinkedIn.");
+    }}
+    </script>
+    """
 
-    if me_response.status_code != 200:
-        return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
-
-    linkedin_id = me_response.json().get("sub")
-    author_urn = f"urn:li:person:{linkedin_id}"
-    print(linkedin_id, "==== linkedin_id ====")
-    print(author_urn, "==== author_urn ====")
-
-
-    # Step 3: Register image upload
-    # author_urn = "urn:li:person:8675309"
-    register_body = {
-        "registerUploadRequest": {
-            "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-            "owner": author_urn,
-            "serviceRelationships": [{
-                "relationshipType": "OWNER",
-                "identifier": "urn:li:userGeneratedContent"
-            }]
-        }
-    }
-    print(register_body, "==== register_body ====")
-    register_headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "X-Restli-Protocol-Version": "2.0.0"
-    }
-    print(register_headers, "==== register_headers ====")
-    register_res = requests.post(
-        "https://api.linkedin.com/v2/assets?action=registerUpload",
-        headers=register_headers,
-        data=json.dumps(register_body)
-    )
-    print(register_res, "==== register_res ====")
-    if register_res.status_code != 200:
-        return f"<h3>❌ Error Registering Upload:</h3><pre>{register_res.json()}</pre>", 400
-
-    upload_data = register_res.json()
-    upload_url = upload_data["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
-    asset_urn = upload_data["value"]["asset"]
-
-    # Step 4: Download image from remote URL
-    image_url = "https://marketplace.canva.com/EAFtLMllF3s/1/0/1600w/canva-blue-and-gold-simple-certificate-zxaa6yB-uaU.jpg"
-    image_response = requests.get(image_url)
-
-    if image_response.status_code != 200:
-        return f"<h3>❌ Failed to download image:</h3><pre>{image_response.text}</pre>", 400
-
-    # Step 5: Upload image to LinkedIn
-    upload_image_res = requests.put(
-        upload_url,
-        data=image_response.content,
-        headers={
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/octet-stream"
-        }
-    )
-
-    if upload_image_res.status_code not in [200, 201]:
-        return f"<h3>❌ Image Upload Failed:</h3><pre>{upload_image_res.text}</pre>", 400
-
-    # Step 5: Create a post
-    post_data = {
-        "author": author_urn,
-        "lifecycleState": "PUBLISHED",
-        "specificContent": {
-            "com.linkedin.ugc.ShareContent": {
-                "shareCommentary": {
-                    "text": """🎉 Excited to share that I’ve successfully completed the "Data Protection and Privacy Foundations" certification from Privacyium Tech! 🚀
-                    This course helped me strengthen my understanding of data handling principles, GDPR compliance, and secure data practices.
-                    Thanks to the instructors and mentors for the guidance and support!
-                    📄 Here’s my certificate 👇
-                    #DataPrivacy #GDPR #Cybersecurity #LearningNeverStops #LinkedIn #Achievement
-                    """
-                },
-                "shareMediaCategory": "IMAGE",
-                "media": [{
-                    "status": "READY",
-                    "description": {"text": "Auto-posted image"},
-                    "media": asset_urn,
-                    "title": {"text": "Flask App Image Upload"}
-                }]
-            }
-        },
-        "visibility": {
-            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-        }
-    }
-    print(post_data, "=================")
-
-    post_res = requests.post(
-        "https://api.linkedin.com/v2/ugcPosts",
-        headers=register_headers,
-        data=json.dumps(post_data)
-    )
-
-    if post_res.status_code == 201:
-        return "<h3>✅ Successfully posted to LinkedIn with image!</h3>"
-    else:
-        return f"<h3>❌ Failed to create post:</h3><pre>{post_res.json()}</pre>", 400
+    return render_template_string(html)
 
 if __name__ == '__main__':
     app.run(debug=True)
