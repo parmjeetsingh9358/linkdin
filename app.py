@@ -78,15 +78,19 @@ def callback():
     access_token1 = "AQU8dc7wNu_FDEsiIl7CIXHxSdhM1Coqp7AMwhKYKKN6dxJYW2e0FLMWwFJCgCkMQGCnO6LgHVnC3uRGfHA4q8qUTnoZ8YLUL6ccTTt6NtlVQNBfbsjkh1_bLkW9QFSAOn34zlo1TC8p1-yXWZteBtnth0DWIzpKeElGwJXss7oMCIpQb1g1gxB2ekwYORh9L3cWX__tdzwOGaNdu_wC5oCPOJ80wGaoYgMr_G1EscFd16oA9cDaPuWjJG8N2oOV2DjwntztZCwi1WK9WnjSMoeHCU7PHmHjLi6zyUq0OhFrJNf2JFgQbVQRgFKZ1A0weUTbtL2gLsLA1ESaRoZsPO9QzvujmA"
     # Step 2: Get actual user URN
     me_response = requests.get(
-        "https://api.linkedin.com/v2/me",
+        "https://api.linkedin.com/v2/userinfo",
         headers={"Authorization": f"Bearer {access_token1}"}
     )
+    print(me_response, "==== me_response ====")
+    print(me_response.json(), "==== json ====")
 
     if me_response.status_code != 200:
         return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
 
     linkedin_id = me_response.json().get("id")
     author_urn = f"urn:li:person:{linkedin_id}"
+    print(linkedin_id, "==== linkedin_id ====")
+    print(author_urn, "==== author_urn ====")
 
 
     # Step 3: Register image upload
