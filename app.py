@@ -125,7 +125,7 @@ def callback():
     asset_urn = upload_data["value"]["asset"]
 
     # Step 4: Download image from remote URL
-    image_url = "https://imgs.search.brave.com/OqAh4CD9t-8wCyru3oo5Douk-c2JYvZiynQ_BV1gKYU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tYXJr/ZXRwbGFjZS5jYW52/YS5jb20vRUFHUEU3/SnEzaDgvOC8wLzE2/MDB3L2NhbnZhLWdy/ZWVuLWFwcHJlY2lh/dGlvbi1jZXJ0aWZp/Y2F0ZS1IWmxwdkhv/a1ZJcy5qcGc"
+    image_url = "https://marketplace.canva.com/EAFtLMllF3s/1/0/1600w/canva-blue-and-gold-simple-certificate-zxaa6yB-uaU.jpg"
     image_response = requests.get(image_url)
 
     if image_response.status_code != 200:
@@ -151,7 +151,12 @@ def callback():
         "specificContent": {
             "com.linkedin.ugc.ShareContent": {
                 "shareCommentary": {
-                    "text": "This post is made from my Flask app with an image! 😎"
+                    "text": """🎉 Excited to share that I’ve successfully completed the "Data Protection and Privacy Foundations" certification from Privacyium Tech! 🚀
+                    This course helped me strengthen my understanding of data handling principles, GDPR compliance, and secure data practices.
+                    Thanks to the instructors and mentors for the guidance and support!
+                    📄 Here’s my certificate 👇
+                    #DataPrivacy #GDPR #Cybersecurity #LearningNeverStops #LinkedIn #Achievement
+                    """
                 },
                 "shareMediaCategory": "IMAGE",
                 "media": [{
