@@ -11,8 +11,8 @@ CLIENT_ID = "8600kyqzq8melc"
 CLIENT_SECRET = "WPL_AP1.Lk3dk1bVdMfM8zAp.yuuqUQ=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
-# SAFE Scope for now (r_emailaddress removed until approved)
-SCOPE = "r_liteprofile"
+# SAFE Scope for now (w_member_social removed until approved)
+SCOPE = "w_member_social"
 
 @app.route('/')
 def index():
