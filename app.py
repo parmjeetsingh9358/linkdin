@@ -4,19 +4,16 @@ import secrets
 from urllib.parse import quote
 
 app = Flask(__name__)
-
-# Secret key for session management
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
 CLIENT_ID = "8600kyqzq8melc"
 CLIENT_SECRET = "WPL_AP1.Lk3dk1bVdMfM8zAp.yuuqUQ=="
-REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must exactly match LinkedIn app config
+REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
-# OAuth scope (permissions requested)
-SCOPE = "r_liteprofile r_emailaddress w_member_social"
+# SAFE Scope for now (r_emailaddress removed until approved)
+SCOPE = "r_liteprofile"
 
-# Step 1: Redirect to LinkedIn for user authorization
 @app.route('/')
 def index():
     state = secrets.token_urlsafe(16)
@@ -34,21 +31,25 @@ def index():
     print("Redirecting to LinkedIn:", auth_url)
     return redirect(auth_url)
 
-# Step 2: Callback route to handle LinkedIn redirect with the auth code
 @app.route('/callback')
 def callback():
-    print("Request args:", request.args)  # Log incoming GET params
+    print("Request args:", request.args)
+
+    # Handle OAuth errors from LinkedIn (like unauthorized_scope_error)
+    if 'error' in request.args:
+        error = request.args.get('error')
+        error_desc = request.args.get('error_description')
+        return f"<h3>❌ OAuth Error:</h3><p><b>{error}</b>: {error_desc}</p>", 400
 
     auth_code = request.args.get('code')
     state = request.args.get('state')
 
-    # Validate presence of required query parameters
     if not auth_code:
         return "Error: Missing authorization code.", 400
     if not state or state != session.get('state'):
         return "Error: Invalid state parameter.", 400
 
-    # Step 3: Exchange the authorization code for an access token
+    # Exchange authorization code for access token
     token_url = "https://www.linkedin.com/oauth/v2/accessToken"
     token_data = {
         'grant_type': 'authorization_code',
@@ -57,7 +58,6 @@ def callback():
         'client_id': CLIENT_ID,
         'client_secret': CLIENT_SECRET
     }
-
     token_headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -68,8 +68,7 @@ def callback():
         access_token = response.json().get('access_token')
         return f"<h3>✅ Access Token:</h3><p>{access_token}</p>"
     else:
-        error_data = response.json()
-        return f"<h3>❌ Error:</h3><pre>{error_data}</pre>", 400
+        return f"<h3>❌ Error Fetching Token:</h3><pre>{response.json()}</pre>", 400
 
 if __name__ == '__main__':
     app.run(debug=True)
