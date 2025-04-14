@@ -17,7 +17,7 @@ CLIENT_SECRET = "WPL_AP1.aiBbAF6LB8hsTBu6.3dwtNQ=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
 # Scope for posting (must be approved in LinkedIn dev portal)
-SCOPE = "r_liteprofile w_member_social"
+SCOPE = "w_member_social"
 
 @app.route('/')
 def index():
@@ -75,21 +75,21 @@ def callback():
     print(access_token, "=========")
 
     # Step 2: Get User URN
-    me_response = requests.get(
-        "https://api.linkedin.com/v2/me",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
-    if me_response.status_code != 200:
-        return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
+    # me_response = requests.get(
+    #     "https://api.linkedin.com/v2/me",
+    #     headers={"Authorization": f"Bearer {access_token}"}
+    # )
+    # if me_response.status_code != 200:
+    #     return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
 
-    linkedin_id = me_response.json().get("id")
-    author_urn = f"urn:li:person:{linkedin_id}"
+    # linkedin_id = me_response.json().get("id")
+    # author_urn = f"urn:li:person:{linkedin_id}"
 
     # Step 3: Register image upload
     register_body = {
         "registerUploadRequest": {
             "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-            "owner": author_urn,
+            "owner": "urn:li:person:8675309",
             "serviceRelationships": [{
                 "relationshipType": "OWNER",
                 "identifier": "urn:li:userGeneratedContent"
