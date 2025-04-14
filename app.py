@@ -4,6 +4,11 @@ import secrets
 from urllib.parse import quote
 
 app = Flask(__name__)
+
+# Set up session configuration for secure cookies and SameSite policy
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
