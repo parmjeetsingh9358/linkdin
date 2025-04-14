@@ -13,8 +13,8 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
-Client_ID = "86s0cexioiiox7"
-Primary_Client_Secret = "WPL_AP1.flaMDksZJWvYDgxB.1KSB3A=="
+CLIENT_ID = "86s0cexioiiox7"
+CLIENT_SECRET = "WPL_AP1.flaMDksZJWvYDgxB.1KSB3A=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
 # Scope for posting (must be approved in LinkedIn dev portal)
