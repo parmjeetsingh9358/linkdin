@@ -13,8 +13,8 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.secret_key = secrets.token_urlsafe(16)
 
 # LinkedIn app credentials
-CLIENT_ID = "8657fpud640rth"
-CLIENT_SECRET = "WPL_AP1.aiBbAF6LB8hsTBu6.3dwtNQ=="
+Client_ID = "86s0cexioiiox7"
+Primary_Client_Secret = "WPL_AP1.flaMDksZJWvYDgxB.1KSB3A=="
 REDIRECT_URI = "https://testing.dpdp-privcy.in.net/callback"  # Must match LinkedIn app settings
 
 # Scope for posting (must be approved in LinkedIn dev portal)
@@ -75,19 +75,21 @@ def callback():
     access_token = token_response.json().get('access_token')
     print(access_token, "=========")
 
-    # Step 2: Get User URN
-    # me_response = requests.get(
-    #     "https://api.linkedin.com/v2/me",
-    #     headers={"Authorization": f"Bearer {access_token}"}
-    # )
-    # if me_response.status_code != 200:
-    #     return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
+    # Step 2: Get actual user URN
+    me_response = requests.get(
+        "https://api.linkedin.com/v2/me",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
 
-    # linkedin_id = me_response.json().get("id")
-    # author_urn = f"urn:li:person:{linkedin_id}"
+    if me_response.status_code != 200:
+        return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
+
+    linkedin_id = me_response.json().get("id")
+    author_urn = f"urn:li:person:{linkedin_id}"
+
 
     # Step 3: Register image upload
-    author_urn = "urn:li:person:8675309"
+    # author_urn = "urn:li:person:8675309"
     register_body = {
         "registerUploadRequest": {
             "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
