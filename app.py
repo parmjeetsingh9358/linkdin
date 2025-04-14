@@ -78,7 +78,7 @@ def callback():
     access_token1 = "AQW5FpxNN9xtSJtsJwHG1fRr9m3C2_Na-1Pn5GJg9Rz99cOjlR93KaS6pvvh2V-4sN-_YDHvre8ujYvgLY5TUwD-7qsRhDrNgubfvo0oWF0NHFKMfEhRBfzK98eyEIWsbAy8ZqTqGsWiSAFbkC1DLoCKnFraplqpWuwJS1c7FTiVp1nhu5reeJGP-RLPs_wB99HTK0R595coNDNFGw3LfaxsZ6nv69f59NbWfpB3mpxpJ7zlz5978FQGWhFvzJGJ6u55O3p48FV6iLqE0pIDJQtSBOx2nigjrm0qeNhsaDE8f8HLjVcmKg51aMaPQfmWyAD04Sukw71LQGXGbvb31SWkr47NcA"
     # Step 2: Get actual user URN
     me_response = requests.get(
-        "https://api.linkedin.com/v2/me",
+        "https://api.linkedin.com/v2/userinfo",
         headers={"Authorization": f"Bearer {access_token1}"}
     )
     print(me_response, "==== me_response ====")
@@ -87,7 +87,7 @@ def callback():
     if me_response.status_code != 200:
         return f"<h3>❌ Error Getting Profile:</h3><pre>{me_response.json()}</pre>", 400
 
-    linkedin_id = me_response.json().get("id")
+    linkedin_id = me_response.json().get("sub")
     author_urn = f"urn:li:person:{linkedin_id}"
     print(linkedin_id, "==== linkedin_id ====")
     print(author_urn, "==== author_urn ====")
