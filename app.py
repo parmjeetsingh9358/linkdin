@@ -98,18 +98,19 @@ def callback():
             }]
         }
     }
+    print(register_body, "==== register_body ====")
     register_headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "X-Restli-Protocol-Version": "2.0.0"
     }
-
+    print(register_headers, "==== register_headers ====")
     register_res = requests.post(
         "https://api.linkedin.com/v2/assets?action=registerUpload",
         headers=register_headers,
         data=json.dumps(register_body)
     )
-
+    print(register_res, "==== register_res ====")
     if register_res.status_code != 200:
         return f"<h3>❌ Error Registering Upload:</h3><pre>{register_res.json()}</pre>", 400
 
