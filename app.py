@@ -3,6 +3,7 @@ import requests
 import secrets
 from urllib.parse import quote
 import json
+import io
 
 app = Flask(__name__)
 
@@ -86,10 +87,11 @@ def callback():
     # author_urn = f"urn:li:person:{linkedin_id}"
 
     # Step 3: Register image upload
+    author_urn = "urn:li:person:8675309"
     register_body = {
         "registerUploadRequest": {
             "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-            "owner": "urn:li:person:8675309",
+            "owner": author_urn,
             "serviceRelationships": [{
                 "relationshipType": "OWNER",
                 "identifier": "urn:li:userGeneratedContent"
@@ -115,13 +117,22 @@ def callback():
     upload_url = upload_data["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
     asset_urn = upload_data["value"]["asset"]
 
-    # Step 4: Upload image to LinkedIn
-    image_path = "https://cdn.pixabay.com/photo/2020/08/24/21/44/man-5515150_640.jpg"  # Make sure this image exists in your folder
-    with open(image_path, "rb") as f:
-        upload_image_res = requests.put(upload_url, data=f, headers={
+    # Step 4: Download image from remote URL
+    image_url = "https://cdn.pixabay.com/photo/2020/08/24/21/44/man-5515150_640.jpg"
+    image_response = requests.get(image_url)
+
+    if image_response.status_code != 200:
+        return f"<h3>❌ Failed to download image:</h3><pre>{image_response.text}</pre>", 400
+
+    # Step 5: Upload image to LinkedIn
+    upload_image_res = requests.put(
+        upload_url,
+        data=image_response.content,
+        headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/octet-stream"
-        })
+        }
+    )
 
     if upload_image_res.status_code not in [200, 201]:
         return f"<h3>❌ Image Upload Failed:</h3><pre>{upload_image_res.text}</pre>", 400
