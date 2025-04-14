@@ -75,11 +75,10 @@ def callback():
     access_token = token_response.json().get('access_token')
     print(access_token, "=========")
 
-    access_token1 = "AQW5FpxNN9xtSJtsJwHG1fRr9m3C2_Na-1Pn5GJg9Rz99cOjlR93KaS6pvvh2V-4sN-_YDHvre8ujYvgLY5TUwD-7qsRhDrNgubfvo0oWF0NHFKMfEhRBfzK98eyEIWsbAy8ZqTqGsWiSAFbkC1DLoCKnFraplqpWuwJS1c7FTiVp1nhu5reeJGP-RLPs_wB99HTK0R595coNDNFGw3LfaxsZ6nv69f59NbWfpB3mpxpJ7zlz5978FQGWhFvzJGJ6u55O3p48FV6iLqE0pIDJQtSBOx2nigjrm0qeNhsaDE8f8HLjVcmKg51aMaPQfmWyAD04Sukw71LQGXGbvb31SWkr47NcA"
     # Step 2: Get actual user URN
     me_response = requests.get(
         "https://api.linkedin.com/v2/userinfo",
-        headers={"Authorization": f"Bearer {access_token1}"}
+        headers={"Authorization": f"Bearer {access_token}"}
     )
     print(me_response, "==== me_response ====")
     print(me_response.json(), "==== json ====")
@@ -107,7 +106,7 @@ def callback():
     }
     print(register_body, "==== register_body ====")
     register_headers = {
-        "Authorization": f"Bearer {access_token1}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "X-Restli-Protocol-Version": "2.0.0"
     }
@@ -137,7 +136,7 @@ def callback():
         upload_url,
         data=image_response.content,
         headers={
-            "Authorization": f"Bearer {access_token1}",
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/octet-stream"
         }
     )
